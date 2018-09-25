@@ -22,6 +22,7 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientAuthenticationProcessingFilter;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.filter.CompositeFilter;
@@ -43,7 +44,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new MyUserDetailsService();
     }
 
+    @Autowired
+    SuccessHandler successHandler;
 
+    @Autowired
+    TokenAuthorizationFilter tokenAuthorizationFilter;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -51,7 +56,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         Log logger = LogFactory.getLog(SecurityConfig.class);
         logger.info("HttpSecurity http");
         http.antMatcher("/**").authorizeRequests()
-                .antMatchers("/", "/login**", "/webjars/**", "/test").permitAll()
+                .antMatchers("/","/login/github", "/login**", "/webjars/**", "/test").permitAll()
                 .anyRequest().authenticated().and().exceptionHandling()
                 .and()
                     .logout().
@@ -60,7 +65,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).and()
                 .addFilterBefore(ssoFilter(), BasicAuthenticationFilter.class)
-                .formLogin();
+                .formLogin().successHandler(successHandler);
+        http.addFilterBefore(tokenAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
         // @formatter:on
     }
 
@@ -117,6 +123,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private Filter ssoFilter(ClientResources client, String path, AbstractPrincipalExtractor principalExtractor) {
         OAuth2ClientAuthenticationProcessingFilter filter = new OAuth2ClientAuthenticationProcessingFilter(
                 path);
+        filter.setAuthenticationSuccessHandler(successHandler);
         OAuth2RestTemplate template = new OAuth2RestTemplate(client.getClient(), oauth2ClientContext);
         filter.setRestTemplate(template);
         UserInfoTokenServices tokenServices = new MyUserInfoTokenServices(client.getResource().getUserInfoUri(), client.getClient().getClientId(), principalExtractor);

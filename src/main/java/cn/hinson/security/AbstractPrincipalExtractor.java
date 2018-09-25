@@ -47,6 +47,6 @@ public abstract class AbstractPrincipalExtractor implements PrincipalExtractor {
       user.setRoles(authorities);
       userService.createUser(user);
     }
-    return user;
+    return user.getUsername();
   }
 }

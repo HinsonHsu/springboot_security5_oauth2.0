@@ -19,7 +19,7 @@
     </select>
 
     <insert id="create" parameterType="cn.hinson.domain.SysUser">
-        insert into sys_user(username, password, facebookid, twitterid, githubid) values(#{username}, #{password},  #{facebookId},  #{twitterId}, #{githubId})
+        insert into sys_user(username, password, facebookid, twitterid, githubid) values(#{username}, #{password},  #{facebookId},  #{twitterId}, #{githubId});
     </insert>
 
     <select id="findByFacebook" parameterType="String" resultMap="userMap">

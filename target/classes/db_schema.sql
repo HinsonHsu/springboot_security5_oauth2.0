@@ -10,6 +10,10 @@ CREATE TABLE sys_role (
   id            int auto_increment primary key,
   name varchar(80)
 );
+INSERT INTO sys_role(NAME) VALUES("USER");
+INSERT INTO sys_role(NAME) VALUES("TWITTER");
+INSERT INTO sys_role(NAME) VALUES("FACEBOOK");
+INSERT INTO sys_role(NAME) VALUES("GITHUB");
 create table sys_role_user(
   id int auto_increment primary key,
   sys_user_id int,
